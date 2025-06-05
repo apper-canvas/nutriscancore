@@ -270,22 +270,20 @@ const [nutritionData, setNutritionData] = useState(null);
         setAlternatives(mockAlternatives);
         setAlternativesLoading(false);
       }, 1000);
-    }
+}
     setShowAlternatives(!showAlternatives);
   };
-
   // Render the upload area
-  const renderUploadArea = () => (
+// Render the upload area
   const renderUploadArea = () => (
     <div
       className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
-        isDragging 
+        isDragging
           ? 'border-primary bg-primary/5' 
           : 'border-surface-300 dark:border-surface-700 hover:border-primary dark:hover:border-primary-light'
       }`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
     >
       {previewImage ? (
         <div className="space-y-4">
@@ -712,9 +710,9 @@ const [nutritionData, setNutritionData] = useState(null);
                           <h4 className="font-semibold flex items-center gap-2">
                             <LeafIcon className="h-4 w-4 text-primary" />
                             Healthier Alternatives to {nutritionData.name}
-                          </h4>
+</h4>
                           
-<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             {alternativesLoading ? (
                               // Loading state for alternatives
                               Array.from({ length: 3 }).map((_, index) => (
@@ -730,21 +728,20 @@ const [nutritionData, setNutritionData] = useState(null);
                                   </div>
                                 </div>
                               ))
-) : alternatives.length > 0 ? (
+                            ) : alternatives.length > 0 ? (
                               alternatives.map((alt) => (
                                 <div key={alt.id} className="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden hover:border-primary dark:hover:border-primary-light transition-colors">
                                   <div className="relative h-24">
                                     <img 
                                       src={alt.image || 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'} 
                                       alt={alt.name}
-className="w-full h-full object-cover"
+                                      className="w-full h-full object-cover"
                                     />
                                     <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-1.5 py-0.5 rounded">
                                       +{Math.round(((alt.healthScore || 0) - (nutritionData?.healthScore || 0)) * 10)}% healthier
                                     </div>
                                   </div>
                                   <div className="p-3">
-<div className="p-3">
                                     <h5 className="font-medium mb-1">{alt.name}</h5>
                                     <div className="flex items-center justify-between text-xs text-surface-600 dark:text-surface-400">
                                       <span>{alt.calories || 0} kcal</span>
