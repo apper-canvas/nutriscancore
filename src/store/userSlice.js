@@ -15,9 +15,10 @@ export const userSlice = createSlice({
       state.user = JSON.parse(JSON.stringify(action.payload));
       state.isAuthenticated = !!action.payload;
     },
-    clearUser: (state) => {
+clearUser: (state) => {
       state.user = null;
       state.isAuthenticated = false;
+      state.isEmailVerified = false;
     },
   },
 });

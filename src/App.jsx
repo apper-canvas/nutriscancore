@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Callback from './pages/Callback'
 import ErrorPage from './pages/ErrorPage'
+import EmailVerification from './pages/EmailVerification'
 import Home from './pages/Home'
 import NotFound from './pages/NotFound'
 import 'react-toastify/dist/ReactToastify.css'
@@ -62,7 +63,18 @@ function App() {
 // CRITICAL: This exact currentPath logic must be preserved in all implementations
         // DO NOT simplify or modify this pattern as it ensures proper redirection flow
         let currentPath = window.location.pathname + window.location.search;
-        let redirectPath = (typeof URLSearchParams !== 'undefined' ? new URLSearchParams(window.location.search) : new URL(window.location).searchParams).get('redirect');
+        let redirectPath = null;
+        try {
+          if (typeof URLSearchParams !== 'undefined') {
+            redirectPath = new URLSearchParams(window.location.search).get('redirect');
+          } else if (window.location.search) {
+            const match = window.location.search.match(/[?&]redirect=([^&]*)/);
+            redirectPath = match ? decodeURIComponent(match[1]) : null;
+          }
+        } catch (error) {
+          console.warn('Error parsing redirect parameter:', error);
+          redirectPath = null;
+        }
         const isAuthPage = currentPath.includes('/login') || currentPath.includes('/signup') || currentPath.includes(
           '/callback') || currentPath.includes('/error');
         if (user) {
