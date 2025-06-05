@@ -5,13 +5,12 @@ import { ToastContainer } from 'react-toastify';
 import { setUser, clearUser } from './store/userSlice';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
-import Callback from './pages/Callback';
-import ErrorPage from './pages/ErrorPage';
-import Home from './pages/Home';
-import NotFound from './pages/NotFound';
-import 'react-toastify/dist/ReactToastify.css';
+import Callback from './pages/Callback'
+import ErrorPage from './pages/ErrorPage'
+import Home from './pages/Home'
+import NotFound from './pages/NotFound'
+import 'react-toastify/dist/ReactToastify.css'
 
-// Create auth context
 export const AuthContext = createContext(null);
 
 function App() {
