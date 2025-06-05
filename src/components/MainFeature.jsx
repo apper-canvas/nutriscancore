@@ -30,9 +30,11 @@ const MainFeature = ({ selectedUnit }) => {
     goal: '',
     activityLevel: ''
   });
-  const [nutritionData, setNutritionData] = useState(null);
+const [nutritionData, setNutritionData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showAlternatives, setShowAlternatives] = useState(false);
+  const [alternativesLoading, setAlternativesLoading] = useState(false);
+  const [alternatives, setAlternatives] = useState([]);
 
   // Mock data for alternatives
   const mockAlternatives = [
@@ -249,21 +251,31 @@ const MainFeature = ({ selectedUnit }) => {
     return recommendedGrams;
   };
 
-  // Reset the analysis
+// Reset the analysis
   const handleReset = () => {
     setPreviewImage(null);
     setNutritionData(null);
     setShowAlternatives(false);
+    setAlternatives([]);
+    setAlternativesLoading(false);
     setStep(1);
     toast.info("Analysis reset. You can upload a new food image.");
   };
-
-  // Toggle showing alternatives
+// Toggle showing alternatives
   const toggleAlternatives = () => {
+    if (!showAlternatives) {
+      // Load alternatives when showing them
+      setAlternativesLoading(true);
+      setTimeout(() => {
+        setAlternatives(mockAlternatives);
+        setAlternativesLoading(false);
+      }, 1000);
+    }
     setShowAlternatives(!showAlternatives);
   };
 
   // Render the upload area
+  const renderUploadArea = () => (
   const renderUploadArea = () => (
     <div
       className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
@@ -702,29 +714,51 @@ const MainFeature = ({ selectedUnit }) => {
                             Healthier Alternatives to {nutritionData.name}
                           </h4>
                           
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            {mockAlternatives.map((alt) => (
-                              <div key={alt.id} className="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden hover:border-primary dark:hover:border-primary-light transition-colors">
-                                <div className="relative h-24">
-                                  <img 
-                                    src={alt.image} 
-                                    alt={alt.name} 
-                                    className="w-full h-full object-cover"
-                                  />
-                                  <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-1.5 py-0.5 rounded">
-                                    +{Math.round((alt.healthScore - nutritionData.healthScore) * 10)}% healthier
+<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            {alternativesLoading ? (
+                              // Loading state for alternatives
+                              Array.from({ length: 3 }).map((_, index) => (
+                                <div key={index} className="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden animate-pulse">
+                                  <div className="h-24 bg-surface-200 dark:bg-surface-700"></div>
+                                  <div className="p-3">
+                                    <div className="h-4 bg-surface-200 dark:bg-surface-700 rounded mb-2"></div>
+                                    <div className="flex justify-between">
+                                      <div className="h-3 bg-surface-200 dark:bg-surface-700 rounded w-12"></div>
+                                      <div className="h-3 bg-surface-200 dark:bg-surface-700 rounded w-16"></div>
+                                      <div className="h-3 bg-surface-200 dark:bg-surface-700 rounded w-12"></div>
+                                    </div>
                                   </div>
                                 </div>
-                                <div className="p-3">
-                                  <h5 className="font-medium mb-1">{alt.name}</h5>
-                                  <div className="flex items-center justify-between text-xs text-surface-600 dark:text-surface-400">
-                                    <span>{alt.calories} kcal</span>
-                                    <span>{alt.protein}g protein</span>
-                                    <span>{alt.carbs}g carbs</span>
+                              ))
+) : alternatives.length > 0 ? (
+                              alternatives.map((alt) => (
+                                <div key={alt.id} className="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden hover:border-primary dark:hover:border-primary-light transition-colors">
+                                  <div className="relative h-24">
+                                    <img 
+                                      src={alt.image || 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'} 
+                                      alt={alt.name}
+className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-1.5 py-0.5 rounded">
+                                      +{Math.round(((alt.healthScore || 0) - (nutritionData?.healthScore || 0)) * 10)}% healthier
+                                    </div>
+                                  </div>
+                                  <div className="p-3">
+<div className="p-3">
+                                    <h5 className="font-medium mb-1">{alt.name}</h5>
+                                    <div className="flex items-center justify-between text-xs text-surface-600 dark:text-surface-400">
+                                      <span>{alt.calories || 0} kcal</span>
+                                      <span>{alt.protein || 0}g protein</span>
+                                      <span>{alt.carbs || 0}g carbs</span>
+                                    </div>
                                   </div>
                                 </div>
+                              ))
+                            ) : (
+                              <div className="col-span-3 text-center py-8 text-surface-500">
+                                No healthier alternatives found. Try analyzing different foods!
                               </div>
-                            ))}
+                            )}
                           </div>
                         </div>
                       </motion.div>
