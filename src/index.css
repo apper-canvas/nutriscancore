@@ -75,7 +75,6 @@
     @apply text-sm font-medium text-surface-700 dark:text-surface-300;
   }
 }
-
 @layer utilities {
   .scrollbar-hide {
     -ms-overflow-style: none;
@@ -88,5 +87,12 @@
   
   .text-balance {
     text-wrap: balance;
+  }
+
+  .sticky-preview {
+    position: sticky;
+    top: 2rem;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
   }
 }

@@ -770,8 +770,8 @@ const [nutritionData, setNutritionData] = useState(null);
     </AnimatePresence>
   );
 
-  return (
-    <section className="max-w-4xl mx-auto">
+return (
+    <section className="max-w-7xl mx-auto">
       <div className="mb-10">
         <div className="text-center max-w-xl mx-auto space-y-4">
           <h2 className="text-3xl font-bold">Analyze Your Food</h2>
@@ -846,9 +846,79 @@ const [nutritionData, setNutritionData] = useState(null);
       </div>
       
       <div className="mt-6">
-        {step === 1 && renderUploadArea()}
-        {step === 2 && renderProfileForm()}
-        {step === 3 && renderResults()}
+        {previewImage ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Sticky Preview Column */}
+            <div className="lg:col-span-1">
+              <div className="sticky-preview">
+                <div className="card overflow-hidden">
+                  <div className="relative h-48 sm:h-64">
+                    <img 
+                      src={previewImage} 
+                      alt="Food preview" 
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent text-white p-4">
+                      <h3 className="text-lg font-bold">
+                        {nutritionData ? nutritionData.name : 'Analyzing...'}
+                      </h3>
+                      {nutritionData && (
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-sm opacity-90">{nutritionData.portionSize} serving</span>
+                          <span className="h-1 w-1 rounded-full bg-white/60"></span>
+                          <div className="flex items-center gap-1">
+                            <HeartIcon className="h-3 w-3" />
+                            <span className="text-sm">Health: {nutritionData.healthScore}/10</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {nutritionData && (
+                    <div className="p-4">
+                      <div className="grid grid-cols-3 gap-2 mb-4">
+                        <div className="text-center">
+                          <span className="text-xs text-surface-500">Calories</span>
+                          <div className="text-lg font-bold">{nutritionData.calories}</div>
+                        </div>
+                        <div className="text-center">
+                          <span className="text-xs text-surface-500">Protein</span>
+                          <div className="text-lg font-bold">{nutritionData.protein}g</div>
+                        </div>
+                        <div className="text-center">
+                          <span className="text-xs text-surface-500">Carbs</span>
+                          <div className="text-lg font-bold">{nutritionData.carbs}g</div>
+                        </div>
+                      </div>
+                      
+                      <button
+                        onClick={handleReset}
+                        className="w-full btn btn-outline text-sm"
+                      >
+                        <RefreshCwIcon className="h-4 w-4" />
+                        Analyze New Food
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Main Content Column */}
+            <div className="lg:col-span-2">
+              {step === 1 && renderUploadArea()}
+              {step === 2 && renderProfileForm()}
+              {step === 3 && renderResults()}
+            </div>
+          </div>
+        ) : (
+          <div className="max-w-4xl mx-auto">
+            {step === 1 && renderUploadArea()}
+            {step === 2 && renderProfileForm()}
+            {step === 3 && renderResults()}
+          </div>
+        )}
       </div>
     </section>
   );
