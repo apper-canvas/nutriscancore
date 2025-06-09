@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
 import { getIcon } from '../utils/iconUtils';
+import { indianFoodService } from '../services';
 
 const CameraIcon = getIcon('camera');
 const UploadIcon = getIcon('upload');
@@ -36,7 +37,11 @@ const [nutritionData, setNutritionData] = useState(null);
   const [alternativesLoading, setAlternativesLoading] = useState(false);
   const [alternatives, setAlternatives] = useState([]);
 
-  // Mock data for alternatives
+// Enhanced alternatives system with Indian cuisine support
+  const [recognizedIndianFood, setRecognizedIndianFood] = useState(null);
+  const [isIndianCuisine, setIsIndianCuisine] = useState(false);
+  
+  // Fallback mock data for non-Indian foods
   const mockAlternatives = [
     {
       id: 1,
@@ -150,7 +155,7 @@ const [nutritionData, setNutritionData] = useState(null);
   };
 
   // Handle form submission to analyze image
-  const handleAnalyzeImage = async () => {
+const handleAnalyzeImage = async () => {
     if (!previewImage) {
       toast.error("Please upload an image first");
       return;
@@ -158,26 +163,78 @@ const [nutritionData, setNutritionData] = useState(null);
 
     setIsLoading(true);
 
-    // Simulate API call with timeout
-    setTimeout(() => {
-      // Mock data for food nutrition analysis
-      const mockNutritionData = {
-        name: "White Rice",
-        calories: 130,
-        protein: 2.7,
-        carbs: 28.2,
-        fats: 0.3,
-        portionSize: "100g",
-        healthScore: 6.5,
-        recommendedPortionSize: calculateRecommendedPortionSize(),
-        dailyCalorieNeeds: calculateDailyCalories()
-      };
+    try {
+      // Attempt to recognize Indian food first
+      // In a real implementation, this would use image recognition AI
+      // For now, we'll simulate based on sample image or random selection
+      
+      // Simulate various Indian dishes that might be detected
+      const possibleIndianFoods = [
+        'Butter Chicken', 'Palak Paneer', 'Dosa', 'Biryani', 'Chana Masala',
+        'Dal Makhani', 'Samosa', 'Idli', 'Naan', 'Masala Chai'
+      ];
+      
+      // For demo purposes, randomly select an Indian dish or use "White Rice" as fallback
+      const randomDetection = Math.random() < 0.7; // 70% chance of detecting Indian food
+      let detectedFoodName = randomDetection 
+        ? possibleIndianFoods[Math.floor(Math.random() * possibleIndianFoods.length)]
+        : "White Rice";
 
-      setNutritionData(mockNutritionData);
+      // Try to recognize as Indian cuisine
+      const recognizedFood = await indianFoodService.recognizeFood(detectedFoodName);
+      
+      let nutritionData;
+      
+      if (recognizedFood) {
+        // Indian food detected
+        setRecognizedIndianFood(recognizedFood);
+        setIsIndianCuisine(true);
+        
+        nutritionData = {
+          name: recognizedFood.name,
+          calories: recognizedFood.calories,
+          protein: recognizedFood.protein,
+          carbs: recognizedFood.carbs,
+          fats: recognizedFood.fats,
+          portionSize: recognizedFood.portionSize,
+          healthScore: recognizedFood.healthScore,
+          recommendedPortionSize: calculateRecommendedPortionSize(),
+          dailyCalorieNeeds: calculateDailyCalories(),
+          category: recognizedFood.category,
+          region: recognizedFood.region,
+          description: recognizedFood.description
+        };
+        
+        toast.success(`${recognizedFood.name} detected! Authentic Indian cuisine nutrition data loaded.`);
+      } else {
+        // Fallback to original mock data for non-Indian foods
+        setRecognizedIndianFood(null);
+        setIsIndianCuisine(false);
+        
+        nutritionData = {
+          name: "White Rice",
+          calories: 130,
+          protein: 2.7,
+          carbs: 28.2,
+          fats: 0.3,
+          portionSize: "100g",
+          healthScore: 6.5,
+          recommendedPortionSize: calculateRecommendedPortionSize(),
+          dailyCalorieNeeds: calculateDailyCalories()
+        };
+        
+        toast.success("Food analyzed successfully!");
+      }
+
+      setNutritionData(nutritionData);
       setIsLoading(false);
-      toast.success("Food analyzed successfully!");
       setStep(3);
-    }, 2000);
+      
+    } catch (error) {
+      console.error('Error during food analysis:', error);
+      setIsLoading(false);
+      toast.error("Analysis failed. Please try again.");
+    }
   };
 
   // Calculate daily calorie needs based on user profile
@@ -261,16 +318,41 @@ const [nutritionData, setNutritionData] = useState(null);
     setStep(1);
     toast.info("Analysis reset. You can upload a new food image.");
   };
-// Toggle showing alternatives
-  const toggleAlternatives = () => {
+// Toggle showing alternatives with Indian cuisine support
+  const toggleAlternatives = async () => {
     if (!showAlternatives) {
       // Load alternatives when showing them
       setAlternativesLoading(true);
-      setTimeout(() => {
+      
+      try {
+        let loadedAlternatives = [];
+        
+        if (isIndianCuisine && recognizedIndianFood) {
+          // Load Indian cuisine alternatives
+          loadedAlternatives = await indianFoodService.getAlternatives(recognizedIndianFood, 3);
+          
+          if (loadedAlternatives.length === 0) {
+            // If no Indian alternatives found, get some popular healthy Indian options
+            const healthyIndianOptions = await indianFoodService.getByCategory('Lentils');
+            loadedAlternatives = healthyIndianOptions.slice(0, 3);
+          }
+        } else {
+          // Use original mock alternatives for non-Indian foods
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate loading
+          loadedAlternatives = mockAlternatives;
+        }
+        
+        setAlternatives(loadedAlternatives);
+        setAlternativesLoading(false);
+        
+      } catch (error) {
+        console.error('Error loading alternatives:', error);
+        // Fallback to mock alternatives
         setAlternatives(mockAlternatives);
         setAlternativesLoading(false);
-      }, 1000);
-}
+        toast.error("Could not load alternatives. Showing default options.");
+      }
+    }
     setShowAlternatives(!showAlternatives);
   };
   // Render the upload area
